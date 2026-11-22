@@ -1,6 +1,6 @@
 {
   "name": "dsh-deepseek-dock",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Liquid-glass DeepSeek dock for DeepSeek Harness: account balance, session tokens/cost and todo progress in the bottom-right corner.",
   "type": "module",
   "main": "lib/index.js",

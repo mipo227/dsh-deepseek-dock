@@ -258,9 +258,41 @@ window.__ModuleLoader__.load({
       var open = openState[0];
       var setOpen = openState[1];
       var rootRef = React.useRef(null);
+      var snapshotRef = React.useRef('');
       var remote = useHostState(sessionId, open);
       var host = remote.host;
       var now = useTicker(15000);
+
+      React.useEffect(function () {
+        var payload = {
+          sessionId: sessionId,
+          todos: Array.isArray(todos) ? todos : null,
+          tokenUsage: usage || null,
+          goal: goalProjection && goalProjection.goal
+            ? {
+                objective: goalProjection.goal.objective,
+                phase: goalProjection.goal.phase,
+                roundsStarted: goalProjection.roundsStarted || 0,
+                maxGoalRounds: goalProjection.goal.maxGoalRounds || 0
+              }
+            : null
+        };
+        var key = JSON.stringify(payload);
+        if (key === snapshotRef.current) return undefined;
+        snapshotRef.current = key;
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, 4000);
+        fetch('/api/deepseek-dock/snapshot', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        }).catch(function () {}).finally(function () { clearTimeout(timer); });
+        return function () {
+          clearTimeout(timer);
+          controller.abort();
+        };
+      }, [sessionId, todos, usage, goalProjection]);
 
       React.useEffect(function () {
         if (!open) return undefined;

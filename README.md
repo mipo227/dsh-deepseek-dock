@@ -1,6 +1,6 @@
 # dsh-deepseek-dock
 
-DSH 右下角的液态玻璃小鲸鱼挂件：**账户余额 + 本会话 token / 估算费用 + 任务完成度**。
+DSH 右下角的液态玻璃小鲸鱼挂件：**账户余额 + 本会话 token / 估算费用 + 任务完成度**。也提供独立桌面版，**DSH 关闭后仍显示在桌面右下角**。
 
 ![预览](docs/preview.png)
 
@@ -19,6 +19,27 @@ DSH 右下角的液态玻璃小鲸鱼挂件：**账户余额 + 本会话 token /
 - 每 60 秒刷新余额；打开面板时 30 秒刷新。支持手动刷新、Escape / 点外部关闭。
 - 透明背景 + 28px 高斯模糊、1px 细边、极简单色排版；没有环形表盘、极光和跟随高光。
 - 尊重 `prefers-reduced-motion`。
+
+## 独立桌面挂件（关闭 DSH 也显示）
+
+桌面版是独立的 Electron 进程：固定在桌面右下角、始终置顶，DSH 退出后仍然显示。
+
+![桌面挂件](desktop/docs/preview.png)
+
+数据来自插件写入的两个缓存：
+
+- `~/.dsh/deepseek-dock/state.json` — 余额、峰谷价、阈值（DSH 运行时每 5 分钟暖刷新）
+- `~/.dsh/deepseek-dock/session.json` — 最近会话的 `todos` / `tokenUsage` 快照
+
+DSH 关闭后，token / 任务保持最后快照；余额显示上次值，超过 2 分钟会标注「上次余额 · X 分钟前」。桌面进程不依赖 DSH 进程。
+
+```sh
+cd desktop
+ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ npm install
+npm start
+```
+
+首次启动会自动创建 LaunchAgent，登录时自启；菜单栏鲸鱼图标可显示/隐藏、始终置顶、关闭开机自启或退出。详见 [desktop/README.md](desktop/README.md)。
 
 ## 数据来源
 

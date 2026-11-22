@@ -1,0 +1,14 @@
+{
+  "name": "dsh-deepseek-dock-desktop",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Standalone always-on-top DeepSeek dock for DSH",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:ui": "node build-ui.mjs"
+  },
+  "devDependencies": {
+    "electron": "45.4.1"
+  }
+}
