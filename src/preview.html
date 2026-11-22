@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeepSeek Dock · 液态玻璃黑色版</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    background: #050506;
+    color: #e9e9ee;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    background:
+      radial-gradient(90% 65% at 72% 4%, rgba(48, 56, 78, 0.42), transparent 62%),
+      radial-gradient(70% 55% at 18% 100%, rgba(30, 34, 46, 0.55), transparent 65%),
+      #060607;
+  }
+
+  .fake-sidebar {
+    width: 248px;
+    flex: 0 0 248px;
+    padding: 20px 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.055);
+    background: rgba(255, 255, 255, 0.014);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .fs-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .fs-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #f4f4f7, #8b8f98);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  }
+
+  .fs-new {
+    margin: 0 2px 14px;
+    padding: 9px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+  }
+
+  .fs-label {
+    margin: 12px 8px 5px;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.28);
+  }
+
+  .fs-row {
+    padding: 8px 9px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.46);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fs-row.active {
+    background: rgba(255, 255, 255, 0.065);
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .fs-foot {
+    margin-top: auto;
+    padding: 9px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.36);
+  }
+
+  .fake-main {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fake-main::after {
+    content: "";
+    position: absolute;
+    right: -100px;
+    bottom: -150px;
+    width: 620px;
+    height: 620px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 42% 42%, rgba(92, 122, 196, 0.26), transparent 64%);
+    filter: blur(52px);
+    pointer-events: none;
+  }
+
+  .fake-header {
+    height: 58px;
+    flex: 0 0 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 26px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  }
+
+  .fh-title { font-size: 12px; font-weight: 550; color: rgba(255, 255, 255, 0.82); }
+
+  .fh-tag {
+    padding: 3px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .fake-chat {
+    width: min(760px, calc(100% - 80px));
+    margin: 0 auto;
+    padding: 56px 0 180px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .msg {
+    margin-bottom: 26px;
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .msg.user {
+    width: fit-content;
+    max-width: 78%;
+    margin-left: auto;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .msg.bot p { margin: 0 0 12px; }
+
+  .code {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.025);
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .fake-composer {
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    z-index: 1;
+    width: min(640px, calc(100% - 120px));
+    height: 54px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px 0 18px;
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 18px;
+    background: rgba(18, 18, 21, 0.72);
+    backdrop-filter: blur(26px) saturate(160%);
+    -webkit-backdrop-filter: blur(26px) saturate(160%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.26);
+    font-size: 12px;
+  }
+
+  .fake-composer .send {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+  }
+
+  .preview-bar {
+    position: fixed;
+    left: 18px;
+    top: 18px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 13px;
+    background: rgba(10, 10, 12, 0.68);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.48);
+    user-select: none;
+  }
+
+  .preview-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.8);
+    padding-right: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .preview-title span {
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.34);
+  }
+
+  .preview-bar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .preview-bar input { accent-color: #e8e8ed; }
+
+  /* == widget css == */
+__CSS__
+</style>
+</head>
+<body>
+  <div class="scene">
+    <aside class="fake-sidebar">
+      <div class="fs-brand"><span class="fs-dot"></span> DeepSeek Harness</div>
+      <div class="fs-new">＋ 新建会话</div>
+      <div class="fs-label">今天</div>
+      <div class="fs-row active">液态玻璃挂件</div>
+      <div class="fs-row">余额与 token 统计</div>
+      <div class="fs-row">任务进度投影</div>
+      <div class="fs-label">昨天</div>
+      <div class="fs-row">插件市场调研</div>
+      <div class="fs-row">dsh 安装脚本</div>
+      <div class="fs-foot">设置</div>
+    </aside>
+    <main class="fake-main">
+      <header class="fake-header">
+        <span class="fh-title">液态玻璃挂件</span>
+        <span class="fh-tag">deepseek-flash</span>
+      </header>
+      <div class="fake-chat">
+        <div class="msg user">用上液态玻璃效果，背景尽量黑色、简约。</div>
+        <div class="msg bot">
+          <p>收到。挂件放在窗口右下角，余额、token 和任务进度都收在一颗小鲸鱼里。</p>
+          <p>面板用黑色半透明玻璃，边缘留一道高光；任务完成度做成环形进度。</p>
+          <div class="code">GET /api/deepseek-dock/state</div>
+        </div>
+      </div>
+      <div class="fake-composer"><span>继续输入…</span><span class="send">↑</span></div>
+    </main>
+  </div>
+
+  <div class="preview-bar" id="bar">
+    <div class="preview-title">DEEPSEEK DOCK <span>液态玻璃 · 黑色</span></div>
+    <label><input type="checkbox" id="ctl-open" checked /> 展开</label>
+    <label><input type="checkbox" id="ctl-low" /> 低余额</label>
+    <label><input type="checkbox" id="ctl-peak" /> 峰时</label>
+    <label><input type="checkbox" id="ctl-tasks" checked /> 任务</label>
+  </div>
+
+  <div class="dsd-root" id="dock" data-open="true" data-progress="pct" data-low="false">
+    <div class="dsd-card" id="card" role="dialog" aria-label="DeepSeek status">
+      <div class="dsd-aurora" aria-hidden="true"></div>
+      <div class="dsd-head">
+        <div class="dsd-brand">
+          <svg viewBox="0 0 50 50" aria-hidden="true">__WHALE__</svg>
+          <span>DEEPSEEK</span><span class="dsd-sub">DOCK</span>
+        </div>
+        <button class="dsd-refresh" id="refresh" type="button" title="刷新余额" aria-label="刷新余额">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 3.5V9H15"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="dsd-label">账户余额</div>
+      <div class="dsd-amount" id="amount" data-level="ok"><span class="dsd-cny" id="currency">¥</span><span id="balance">124.80</span></div>
+      <div class="dsd-meta">
+        <span class="dsd-tag" id="peaktag" data-peak="false"><i aria-hidden="true"></i><span id="peaklabel">谷时</span></span>
+        <span id="source">账户余额</span>
+      </div>
+      <div class="dsd-rule"></div>
+      <div class="dsd-usage-grid">
+        <div class="dsd-stat"><b id="tok-in">1.8M</b><span>输入</span></div>
+        <div class="dsd-stat"><b id="tok-out">42.6K</b><span>输出</span></div>
+        <div class="dsd-stat"><b id="tok-cache">92%</b><span>缓存命中</span></div>
+      </div>
+      <div class="dsd-costline"><span id="sessionline">本会话 · 1.9M tokens</span><b id="cost">≈ ¥0.35</b></div>
+      <div class="dsd-rule"></div>
+      <div class="dsd-section-head"><span>任务</span><b id="taskcount">2/6</b></div>
+      <div class="dsd-progress"><i id="bar" style="width:33.3%"></i></div>
+      <ul class="dsd-todos" id="todos">
+        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">调研 GitHub 上的成熟参考项目</span></li>
+        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">确定余额与 token 数据来源</span></li>
+        <li data-status="in_progress"><span class="dsd-check"></span><span class="dsd-todo-text">实现液态玻璃挂件 UI</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">接入 todo 任务进度投影</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">安装到 DSH 桌面端并验证</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">补充余额预警与刷新策略</span></li>
+      </ul>
+      <div class="dsd-empty" id="empty" hidden><b>暂无任务清单</b><span>智能体开始多步任务时，会在这里显示完成进度</span></div>
+      <div class="dsd-goal" id="goal"><span>目标 · 完成液态玻璃挂件并接入真实数据</span><b>轮次 2/5</b></div>
+      <div class="dsd-foot"><span id="footnote">估算值，以官方账单为准</span><span>刚刚更新</span></div>
+    </div>
+    <div class="dsd-orb-wrap">
+      <button class="dsd-orb" id="orb" type="button" aria-expanded="true" aria-label="收起 DeepSeek 状态">
+        <svg class="dsd-ring" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="dsd-ring-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="100%" stop-color="#8f949c"></stop>
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="32" cy="32" r="29"></circle>
+          <circle class="fill" id="ringfill" cx="32" cy="32" r="29" stroke-dasharray="182.21" stroke-dashoffset="121.47"></circle>
+        </svg>
+        <svg class="dsd-logo" viewBox="0 0 50 50" aria-hidden="true">__WHALE__</svg>
+      </button>
+      <button class="dsd-chip" id="chip" type="button" data-low="false" aria-label="打开 DeepSeek 状态">
+        <span id="chipmoney">¥124.80</span>
+        <span class="dsd-chip-sep" aria-hidden="true"></span>
+        <span class="dsd-chip-task" id="chiptask">2/6</span>
+      </button>
+    </div>
+  </div>
+
+<script>
+  const dock = document.getElementById('dock');
+  const card = document.getElementById('card');
+  const orb = document.getElementById('orb');
+  const chip = document.getElementById('chip');
+  const openCtl = document.getElementById('ctl-open');
+  const lowCtl = document.getElementById('ctl-low');
+  const peakCtl = document.getElementById('ctl-peak');
+  const tasksCtl = document.getElementById('ctl-tasks');
+
+  function setOpen(value) {
+    dock.dataset.open = value ? 'true' : 'false';
+    openCtl.checked = value;
+    orb.setAttribute('aria-expanded', String(value));
+  }
+
+  orb.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  chip.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  openCtl.addEventListener('change', () => setOpen(openCtl.checked));
+
+  lowCtl.addEventListener('change', () => {
+    const low = lowCtl.checked;
+    document.getElementById('balance').textContent = low ? '3.20' : '124.80';
+    document.getElementById('chipmoney').textContent = (low ? '¥3.20' : '¥124.80');
+    document.getElementById('amount').dataset.level = low ? 'warn' : 'ok';
+    chip.dataset.low = low ? 'true' : 'false';
+    dock.dataset.low = low ? 'true' : 'false';
+  });
+
+  peakCtl.addEventListener('change', () => {
+    const peak = peakCtl.checked;
+    document.getElementById('peaktag').dataset.peak = peak ? 'true' : 'false';
+    document.getElementById('peaklabel').textContent = peak ? '峰时' : '谷时';
+    document.getElementById('cost').textContent = peak ? '≈ ¥0.70' : '≈ ¥0.35';
+  });
+
+  tasksCtl.addEventListener('change', () => {
+    const on = tasksCtl.checked;
+    document.getElementById('todos').hidden = !on;
+    document.getElementById('empty').hidden = on;
+    document.getElementById('goal').hidden = !on;
+    document.getElementById('bar').style.width = on ? '33.3%' : '0%';
+    document.getElementById('taskcount').textContent = on ? '2/6' : '—';
+    document.getElementById('chiptask').textContent = on ? '2/6' : '0/0';
+    dock.dataset.progress = on ? 'pct' : 'none';
+    document.getElementById('ringfill').style.opacity = on ? '1' : '0';
+    if (on) {
+      document.getElementById('ringfill').setAttribute('stroke-dashoffset', '121.47');
+    }
+  });
+
+  document.getElementById('refresh').addEventListener('click', function () {
+    const button = this;
+    button.dataset.busy = 'true';
+    setTimeout(() => { button.dataset.busy = 'false'; }, 900);
+  });
+
+  card.addEventListener('pointermove', function (event) {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (event.clientX - rect.left) + 'px');
+    card.style.setProperty('--my', (event.clientY - rect.top) + 'px');
+  });
+
+  card.addEventListener('pointerleave', function () {
+    card.style.setProperty('--mx', '72%');
+    card.style.setProperty('--my', '0%');
+  });
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('open') === '0') setOpen(false);
+  if (params.get('low') === '1') {
+    lowCtl.checked = true;
+    lowCtl.dispatchEvent(new Event('change'));
+  }
+  if (params.get('peak') === '1') {
+    peakCtl.checked = true;
+    peakCtl.dispatchEvent(new Event('change'));
+  }
+  if (params.get('tasks') === '0') {
+    tasksCtl.checked = false;
+    tasksCtl.dispatchEvent(new Event('change'));
+  }
+  if (params.get('clean') === '1') {
+    document.getElementById('bar').style.display = 'none';
+  }
+</script>
+</body>
+</html>

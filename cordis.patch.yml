@@ -1,0 +1,6 @@
+# dsh-deepseek-dock bundle patch: insert the dual-face plugin row.
+# The host half (exports ".") registers /api/deepseek-dock/state; the client
+# half (exports "./client", dsh.client.platform=web) renders the floating dock.
+- insert:
+    - id: deepseek-dock
+      name: 'dsh-deepseek-dock'

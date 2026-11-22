@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DeepSeek Dock · 液态玻璃黑色版</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    background: #050506;
+    color: #e9e9ee;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    background:
+      radial-gradient(90% 65% at 72% 4%, rgba(48, 56, 78, 0.42), transparent 62%),
+      radial-gradient(70% 55% at 18% 100%, rgba(30, 34, 46, 0.55), transparent 65%),
+      #060607;
+  }
+
+  .fake-sidebar {
+    width: 248px;
+    flex: 0 0 248px;
+    padding: 20px 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.055);
+    background: rgba(255, 255, 255, 0.014);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .fs-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .fs-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #f4f4f7, #8b8f98);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  }
+
+  .fs-new {
+    margin: 0 2px 14px;
+    padding: 9px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+  }
+
+  .fs-label {
+    margin: 12px 8px 5px;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.28);
+  }
+
+  .fs-row {
+    padding: 8px 9px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.46);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fs-row.active {
+    background: rgba(255, 255, 255, 0.065);
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .fs-foot {
+    margin-top: auto;
+    padding: 9px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.36);
+  }
+
+  .fake-main {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fake-main::after {
+    content: "";
+    position: absolute;
+    right: -100px;
+    bottom: -150px;
+    width: 620px;
+    height: 620px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 42% 42%, rgba(92, 122, 196, 0.26), transparent 64%);
+    filter: blur(52px);
+    pointer-events: none;
+  }
+
+  .fake-header {
+    height: 58px;
+    flex: 0 0 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 26px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  }
+
+  .fh-title { font-size: 12px; font-weight: 550; color: rgba(255, 255, 255, 0.82); }
+
+  .fh-tag {
+    padding: 3px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .fake-chat {
+    width: min(760px, calc(100% - 80px));
+    margin: 0 auto;
+    padding: 56px 0 180px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .msg {
+    margin-bottom: 26px;
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(255, 255, 255, 0.66);
+  }
+
+  .msg.user {
+    width: fit-content;
+    max-width: 78%;
+    margin-left: auto;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .msg.bot p { margin: 0 0 12px; }
+
+  .code {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.025);
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .fake-composer {
+    position: absolute;
+    left: 50%;
+    bottom: 26px;
+    z-index: 1;
+    width: min(640px, calc(100% - 120px));
+    height: 54px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px 0 18px;
+    border: 1px solid rgba(255, 255, 255, 0.085);
+    border-radius: 18px;
+    background: rgba(18, 18, 21, 0.72);
+    backdrop-filter: blur(26px) saturate(160%);
+    -webkit-backdrop-filter: blur(26px) saturate(160%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.26);
+    font-size: 12px;
+  }
+
+  .fake-composer .send {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+  }
+
+  .preview-bar {
+    position: fixed;
+    left: 18px;
+    top: 18px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 13px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 13px;
+    background: rgba(10, 10, 12, 0.68);
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.48);
+    user-select: none;
+  }
+
+  .preview-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.8);
+    padding-right: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .preview-title span {
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.34);
+  }
+
+  .preview-bar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .preview-bar input { accent-color: #e8e8ed; }
+
+  /* == widget css == */
+.dsd-root {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147482600;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
+  pointer-events: none;
+  color: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+  user-select: none;
+  --dsd-line: rgba(255, 255, 255, 0.10);
+  --dsd-dim: rgba(245, 245, 247, 0.52);
+  --dsd-faint: rgba(245, 245, 247, 0.30);
+  --dsd-warn: #ffb340;
+  --dsd-bad: #ff5a4f;
+  --dsd-ok: #8be28b;
+}
+
+.dsd-root[data-open="true"] { z-index: 2147482601; }
+
+.dsd-card {
+  position: relative;
+  width: 300px;
+  max-height: min(72vh, 532px);
+  padding: 15px 15px 12px;
+  border-radius: 22px;
+  overflow: hidden;
+  pointer-events: auto;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(12px) scale(0.965);
+  transform-origin: 100% 100%;
+  filter: blur(7px);
+  transition:
+    opacity 0.26s ease,
+    transform 0.44s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.3s ease,
+    visibility 0s linear 0.44s;
+  background:
+    radial-gradient(140% 90% at 12% -10%, rgba(255, 255, 255, 0.14), transparent 56%),
+    radial-gradient(90% 70% at 100% 110%, rgba(140, 180, 255, 0.08), transparent 62%),
+    linear-gradient(155deg, rgba(31, 31, 35, 0.80), rgba(6, 6, 8, 0.90));
+  backdrop-filter: blur(42px) saturate(180%);
+  -webkit-backdrop-filter: blur(42px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.66),
+    0 6px 22px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dsd-root[data-open="true"] .dsd-card {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition-delay: 0s;
+}
+
+.dsd-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    150deg,
+    rgba(255, 255, 255, 0.56),
+    rgba(255, 255, 255, 0.10) 24%,
+    rgba(255, 255, 255, 0.02) 52%,
+    rgba(255, 255, 255, 0.16) 78%,
+    rgba(255, 255, 255, 0.44)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0.74;
+}
+
+.dsd-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      270px circle at var(--mx, 72%) var(--my, 0%),
+      rgba(255, 255, 255, 0.22),
+      transparent 60%
+    ),
+    linear-gradient(118deg, rgba(255, 255, 255, 0.07), transparent 28%, transparent 72%, rgba(255, 255, 255, 0.035));
+  opacity: 0.92;
+  mix-blend-mode: screen;
+}
+
+.dsd-aurora {
+  position: absolute;
+  inset: -70px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.34;
+  background:
+    radial-gradient(38% 38% at 28% 30%, rgba(255, 255, 255, 0.26), transparent 62%),
+    radial-gradient(34% 34% at 72% 66%, rgba(130, 170, 255, 0.16), transparent 66%),
+    radial-gradient(40% 40% at 55% 16%, rgba(255, 255, 255, 0.10), transparent 60%);
+  filter: blur(24px);
+  animation: dsd-drift 18s ease-in-out infinite alternate;
+}
+
+.dsd-card > * { position: relative; z-index: 1; }
+
+.dsd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.dsd-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.17em;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.dsd-brand svg { width: 14px; height: 14px; opacity: 0.92; }
+
+.dsd-brand .dsd-sub {
+  color: var(--dsd-faint);
+  font-weight: 500;
+  letter-spacing: 0.13em;
+}
+
+.dsd-refresh {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--dsd-dim);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+
+.dsd-refresh:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.dsd-refresh[data-busy="true"] svg { animation: dsd-spin 0.9s linear infinite; }
+
+.dsd-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--dsd-faint);
+}
+
+.dsd-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin-top: 3px;
+  font-size: 36px;
+  font-weight: 250;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.dsd-amount[data-level="warn"] { color: var(--dsd-warn); }
+.dsd-amount[data-level="bad"] { color: var(--dsd-bad); }
+
+.dsd-cny {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--dsd-dim);
+  transform: translateY(-9px);
+}
+
+.dsd-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  font-size: 10px;
+  color: var(--dsd-faint);
+}
+
+.dsd-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--dsd-dim);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.dsd-tag i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--dsd-ok);
+  box-shadow: 0 0 7px rgba(139, 226, 139, 0.6);
+}
+
+.dsd-tag[data-peak="true"] i {
+  background: var(--dsd-warn);
+  box-shadow: 0 0 7px rgba(255, 179, 64, 0.6);
+}
+
+.dsd-rule {
+  height: 1px;
+  margin: 13px 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.10), transparent);
+}
+
+.dsd-usage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+.dsd-stat b {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.dsd-stat span {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  color: var(--dsd-faint);
+}
+
+.dsd-costline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--dsd-faint);
+}
+
+.dsd-costline b {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.86);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsd-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--dsd-dim);
+}
+
+.dsd-section-head b {
+  font-weight: 500;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.dsd-progress {
+  height: 2px;
+  margin: 8px 0 9px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.dsd-progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.52), #fff);
+  box-shadow: 0 0 9px rgba(255, 255, 255, 0.34);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dsd-todos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 154px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.dsd-todos::-webkit-scrollbar { width: 4px; }
+.dsd-todos::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); border-radius: 4px; }
+
+.dsd-todos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 11px;
+  line-height: 1.42;
+  color: var(--dsd-dim);
+}
+
+.dsd-todos li[data-status="completed"] { color: var(--dsd-faint); }
+.dsd-todos li[data-status="in_progress"] { color: #fff; }
+
+.dsd-todos li[data-status="completed"] .dsd-todo-text {
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 255, 255, 0.24);
+}
+
+.dsd-check {
+  flex: 0 0 13px;
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: transparent;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.dsd-todos li[data-status="completed"] .dsd-check {
+  background: #f5f5f7;
+  border-color: #f5f5f7;
+  color: #0a0a0c;
+}
+
+.dsd-todos li[data-status="in_progress"] .dsd-check {
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+.dsd-todos li[data-status="in_progress"] .dsd-check::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 9px rgba(255, 255, 255, 0.85);
+  animation: dsd-pulse 1.6s ease-in-out infinite;
+}
+
+.dsd-empty {
+  padding: 8px 0 4px;
+  font-size: 10px;
+  line-height: 1.55;
+  color: var(--dsd-faint);
+}
+
+.dsd-empty b { display: block; font-weight: 500; color: var(--dsd-dim); }
+
+.dsd-goal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 10px;
+  color: var(--dsd-faint);
+}
+
+.dsd-goal span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dsd-goal b {
+  flex: 0 0 auto;
+  font-weight: 500;
+  color: var(--dsd-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.dsd-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: rgba(245, 245, 247, 0.24);
+}
+
+.dsd-foot .dsd-err { color: var(--dsd-bad); }
+
+.dsd-orb-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.dsd-orb {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background:
+    radial-gradient(80% 80% at 32% 22%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05) 42%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(160deg, rgba(32, 32, 36, 0.86), rgba(5, 5, 7, 0.94));
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.56),
+    inset 0 1px 1px rgba(255, 255, 255, 0.42),
+    inset 0 -9px 18px rgba(0, 0, 0, 0.40);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition:
+    transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.36s ease,
+    border-color 0.36s ease;
+}
+
+.dsd-orb:hover {
+  transform: translateY(-2px) scale(1.045);
+  border-color: rgba(255, 255, 255, 0.30);
+  box-shadow:
+    0 17px 52px rgba(0, 0, 0, 0.62),
+    inset 0 1px 1px rgba(255, 255, 255, 0.55),
+    inset 0 -9px 18px rgba(0, 0, 0, 0.40);
+}
+
+.dsd-orb:active { transform: scale(0.955); }
+.dsd-orb:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.55); outline-offset: 3px; }
+
+.dsd-logo {
+  position: relative;
+  z-index: 2;
+  width: 31px;
+  height: 31px;
+  color: #fff;
+  filter: drop-shadow(0 1px 7px rgba(0, 0, 0, 0.55));
+}
+
+.dsd-orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.20), transparent 34%, transparent 70%, rgba(255, 255, 255, 0.04));
+  mix-blend-mode: screen;
+}
+
+.dsd-ring {
+  position: absolute;
+  z-index: 2;
+  inset: -4px;
+  width: 64px;
+  height: 64px;
+  overflow: visible;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.dsd-ring circle { fill: none; stroke-width: 2.4; }
+
+.dsd-ring .track { stroke: rgba(255, 255, 255, 0.14); }
+
+.dsd-ring .fill {
+  stroke: url(#dsd-ring-gradient);
+  stroke-linecap: round;
+  opacity: 1;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+.dsd-root[data-progress="none"] .dsd-ring .fill { opacity: 0; }
+.dsd-root[data-progress="none"] .dsd-ring .track {
+  stroke-dasharray: 2 6;
+  opacity: 0.75;
+  animation: dsd-breathe 3.2s ease-in-out infinite;
+}
+
+.dsd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: linear-gradient(180deg, rgba(28, 28, 32, 0.88), rgba(8, 8, 10, 0.92));
+  box-shadow: 0 7px 22px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+
+.dsd-chip:hover { border-color: rgba(255, 255, 255, 0.20); color: #fff; }
+.dsd-chip[data-low="true"] { color: var(--dsd-warn); }
+
+.dsd-chip-sep {
+  width: 1px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.14);
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.3s ease, opacity 0.25s ease;
+}
+
+.dsd-chip-task {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--dsd-faint);
+  transition: max-width 0.34s ease, opacity 0.26s ease;
+}
+
+.dsd-root[data-open="true"] .dsd-chip-sep,
+.dsd-root:hover .dsd-chip-sep { max-width: 1px; opacity: 1; }
+
+.dsd-root[data-open="true"] .dsd-chip-task,
+.dsd-root:hover .dsd-chip-task { max-width: 64px; opacity: 1; }
+
+@keyframes dsd-drift {
+  from { transform: translate3d(-5%, -4%, 0) rotate(0deg); }
+  to { transform: translate3d(5%, 4%, 0) rotate(11deg); }
+}
+
+@keyframes dsd-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.78); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes dsd-spin { to { transform: rotate(360deg); } }
+
+@keyframes dsd-breathe {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.8; }
+}
+
+@media (max-width: 640px) {
+  .dsd-root { right: 10px; bottom: 10px; }
+  .dsd-card { width: min(300px, calc(100vw - 20px)); }
+  .dsd-orb { width: 48px; height: 48px; }
+  .dsd-logo { width: 27px; height: 27px; }
+  .dsd-ring { width: 56px; height: 56px; inset: -4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dsd-card, .dsd-orb, .dsd-chip, .dsd-progress i, .dsd-ring .fill, .dsd-chip-sep, .dsd-chip-task {
+    transition: none !important;
+  }
+  .dsd-aurora,
+  .dsd-todos li[data-status="in_progress"] .dsd-check::after,
+  .dsd-root[data-progress="none"] .dsd-ring .track { animation: none !important; }
+}
+</style>
+</head>
+<body>
+  <div class="scene">
+    <aside class="fake-sidebar">
+      <div class="fs-brand"><span class="fs-dot"></span> DeepSeek Harness</div>
+      <div class="fs-new">＋ 新建会话</div>
+      <div class="fs-label">今天</div>
+      <div class="fs-row active">液态玻璃挂件</div>
+      <div class="fs-row">余额与 token 统计</div>
+      <div class="fs-row">任务进度投影</div>
+      <div class="fs-label">昨天</div>
+      <div class="fs-row">插件市场调研</div>
+      <div class="fs-row">dsh 安装脚本</div>
+      <div class="fs-foot">设置</div>
+    </aside>
+    <main class="fake-main">
+      <header class="fake-header">
+        <span class="fh-title">液态玻璃挂件</span>
+        <span class="fh-tag">deepseek-flash</span>
+      </header>
+      <div class="fake-chat">
+        <div class="msg user">用上液态玻璃效果，背景尽量黑色、简约。</div>
+        <div class="msg bot">
+          <p>收到。挂件放在窗口右下角，余额、token 和任务进度都收在一颗小鲸鱼里。</p>
+          <p>面板用黑色半透明玻璃，边缘留一道高光；任务完成度做成环形进度。</p>
+          <div class="code">GET /api/deepseek-dock/state</div>
+        </div>
+      </div>
+      <div class="fake-composer"><span>继续输入…</span><span class="send">↑</span></div>
+    </main>
+  </div>
+
+  <div class="preview-bar" id="bar">
+    <div class="preview-title">DEEPSEEK DOCK <span>液态玻璃 · 黑色</span></div>
+    <label><input type="checkbox" id="ctl-open" checked /> 展开</label>
+    <label><input type="checkbox" id="ctl-low" /> 低余额</label>
+    <label><input type="checkbox" id="ctl-peak" /> 峰时</label>
+    <label><input type="checkbox" id="ctl-tasks" checked /> 任务</label>
+  </div>
+
+  <div class="dsd-root" id="dock" data-open="true" data-progress="pct" data-low="false">
+    <div class="dsd-card" id="card" role="dialog" aria-label="DeepSeek status">
+      <div class="dsd-aurora" aria-hidden="true"></div>
+      <div class="dsd-head">
+        <div class="dsd-brand">
+          <svg viewBox="0 0 50 50" aria-hidden="true"><path d="M48.8354 10.0479C48.3232 9.79199 48.1025 10.2798 47.8032 10.5278C47.7007 10.6079 47.6143 10.7119 47.5273 10.8076C46.7793 11.624 45.9048 12.1597 44.7622 12.0957C43.0923 12 41.666 12.5356 40.4058 13.8398C40.1377 12.2319 39.2476 11.272 37.8926 10.6558C37.1836 10.3359 36.4668 10.0156 35.9702 9.31982C35.6235 8.82373 35.5293 8.27197 35.356 7.72754C35.2456 7.3999 35.1353 7.06396 34.7651 7.00781C34.3633 6.94385 34.2056 7.2876 34.0479 7.57568C33.418 8.75195 33.1733 10.0479 33.1973 11.3599C33.2524 14.312 34.4736 16.6641 36.8999 18.3359C37.1758 18.5278 37.2466 18.7197 37.1597 19C36.9946 19.5757 36.7974 20.1357 36.624 20.7119C36.5137 21.0801 36.3486 21.1597 35.9624 21C34.6309 20.4321 33.481 19.5918 32.4644 18.5757C30.7393 16.8721 29.1792 14.9917 27.2334 13.52C26.7764 13.1758 26.3193 12.856 25.8467 12.5518C23.8618 10.584 26.1069 8.96777 26.627 8.77588C27.1704 8.57568 26.8159 7.8877 25.0591 7.896C23.3022 7.90381 21.6953 8.50391 19.647 9.30371C19.3477 9.42383 19.0322 9.51172 18.7095 9.58398C16.8501 9.22363 14.9199 9.14355 12.9033 9.37598C9.10596 9.80762 6.07275 11.6396 3.84326 14.7681C1.16455 18.5278 0.53418 22.7998 1.30664 27.2559C2.11768 31.9521 4.46582 35.8398 8.07373 38.8799C11.8159 42.0322 16.1255 43.5762 21.041 43.2803C24.0269 43.104 27.3516 42.6963 31.1016 39.4561C32.0469 39.936 33.0396 40.1279 34.686 40.272C35.9546 40.3921 37.1758 40.208 38.1211 40.0078C39.6021 39.688 39.4995 38.2881 38.9639 38.0322C34.623 35.9678 35.5762 36.8081 34.71 36.1279C36.9155 33.4639 40.2402 30.6958 41.54 21.728C41.6426 21.0161 41.5557 20.5679 41.54 19.9917C41.5322 19.6396 41.6108 19.5039 42.0049 19.4639C43.0923 19.3359 44.1479 19.0317 45.1167 18.4878C47.9292 16.9199 49.064 14.3438 49.3315 11.2559C49.3711 10.7837 49.3237 10.2959 48.8354 10.0479ZM24.3262 37.8398C20.1196 34.4639 18.0791 33.3521 17.2358 33.3999C16.4482 33.4482 16.5898 34.3682 16.7632 34.9678C16.9443 35.5601 17.1812 35.9683 17.5117 36.4878C17.7402 36.832 17.8979 37.3442 17.2832 37.728C15.9282 38.584 13.5728 37.4399 13.4624 37.3838C10.7207 35.7358 8.42822 33.5601 6.81348 30.584C5.25342 27.7197 4.34766 24.6479 4.19775 21.3677C4.1582 20.5757 4.38672 20.2959 5.15869 20.1519C6.17529 19.96 7.22314 19.9199 8.23926 20.0718C12.5327 20.7119 16.1885 22.6719 19.2529 25.7759C21.002 27.5439 22.3252 29.6558 23.6885 31.7202C25.1377 33.9121 26.6978 36 28.6831 37.7119C29.3843 38.312 29.9434 38.7681 30.479 39.104C28.8643 39.2881 26.1699 39.3281 24.3262 37.8398ZM26.3433 24.6001C26.3433 24.248 26.6191 23.9678 26.9658 23.9678C27.0444 23.9678 27.1152 23.9839 27.1782 24.0078C27.2651 24.04 27.3438 24.0879 27.4067 24.1602C27.5171 24.272 27.5801 24.4321 27.5801 24.6001C27.5801 24.9521 27.3042 25.2319 26.9575 25.2319C26.6108 25.2319 26.3433 24.9521 26.3433 24.6001ZM32.6064 27.8799C32.2046 28.0479 31.8027 28.1919 31.4165 28.208C30.8179 28.2397 30.1641 27.9922 29.8096 27.688C29.2583 27.2158 28.8643 26.9521 28.6987 26.1279C28.6279 25.7759 28.6675 25.2319 28.7305 24.9199C28.8721 24.248 28.7144 23.8159 28.2495 23.4238C27.8716 23.104 27.3911 23.0161 26.8633 23.0161C26.666 23.0161 26.4849 22.9277 26.3511 22.856C26.1304 22.7441 25.9492 22.4639 26.1226 22.1201C26.1777 22.0078 26.4458 21.7358 26.5088 21.688C27.2256 21.272 28.0527 21.4077 28.8169 21.7197C29.5259 22.0161 30.0615 22.5601 30.834 23.3281C31.6216 24.2559 31.7632 24.5117 32.2124 25.208C32.5669 25.752 32.8901 26.312 33.1104 26.9521C33.2446 27.3521 33.0713 27.6802 32.6064 27.8799Z" fill="currentColor" fill-opacity="1.000000" fill-rule="nonzero"/></svg>
+          <span>DEEPSEEK</span><span class="dsd-sub">DOCK</span>
+        </div>
+        <button class="dsd-refresh" id="refresh" type="button" title="刷新余额" aria-label="刷新余额">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"></path><path d="M20.5 3.5V9H15"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="dsd-label">账户余额</div>
+      <div class="dsd-amount" id="amount" data-level="ok"><span class="dsd-cny" id="currency">¥</span><span id="balance">124.80</span></div>
+      <div class="dsd-meta">
+        <span class="dsd-tag" id="peaktag" data-peak="false"><i aria-hidden="true"></i><span id="peaklabel">谷时</span></span>
+        <span id="source">账户余额</span>
+      </div>
+      <div class="dsd-rule"></div>
+      <div class="dsd-usage-grid">
+        <div class="dsd-stat"><b id="tok-in">1.8M</b><span>输入</span></div>
+        <div class="dsd-stat"><b id="tok-out">42.6K</b><span>输出</span></div>
+        <div class="dsd-stat"><b id="tok-cache">92%</b><span>缓存命中</span></div>
+      </div>
+      <div class="dsd-costline"><span id="sessionline">本会话 · 1.9M tokens</span><b id="cost">≈ ¥0.35</b></div>
+      <div class="dsd-rule"></div>
+      <div class="dsd-section-head"><span>任务</span><b id="taskcount">2/6</b></div>
+      <div class="dsd-progress"><i id="bar" style="width:33.3%"></i></div>
+      <ul class="dsd-todos" id="todos">
+        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">调研 GitHub 上的成熟参考项目</span></li>
+        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">确定余额与 token 数据来源</span></li>
+        <li data-status="in_progress"><span class="dsd-check"></span><span class="dsd-todo-text">实现液态玻璃挂件 UI</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">接入 todo 任务进度投影</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">安装到 DSH 桌面端并验证</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">补充余额预警与刷新策略</span></li>
+      </ul>
+      <div class="dsd-empty" id="empty" hidden><b>暂无任务清单</b><span>智能体开始多步任务时，会在这里显示完成进度</span></div>
+      <div class="dsd-goal" id="goal"><span>目标 · 完成液态玻璃挂件并接入真实数据</span><b>轮次 2/5</b></div>
+      <div class="dsd-foot"><span id="footnote">估算值，以官方账单为准</span><span>刚刚更新</span></div>
+    </div>
+    <div class="dsd-orb-wrap">
+      <button class="dsd-orb" id="orb" type="button" aria-expanded="true" aria-label="收起 DeepSeek 状态">
+        <svg class="dsd-ring" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="dsd-ring-gradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="100%" stop-color="#8f949c"></stop>
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="32" cy="32" r="29"></circle>
+          <circle class="fill" id="ringfill" cx="32" cy="32" r="29" stroke-dasharray="182.21" stroke-dashoffset="121.47"></circle>
+        </svg>
+        <svg class="dsd-logo" viewBox="0 0 50 50" aria-hidden="true"><path d="M48.8354 10.0479C48.3232 9.79199 48.1025 10.2798 47.8032 10.5278C47.7007 10.6079 47.6143 10.7119 47.5273 10.8076C46.7793 11.624 45.9048 12.1597 44.7622 12.0957C43.0923 12 41.666 12.5356 40.4058 13.8398C40.1377 12.2319 39.2476 11.272 37.8926 10.6558C37.1836 10.3359 36.4668 10.0156 35.9702 9.31982C35.6235 8.82373 35.5293 8.27197 35.356 7.72754C35.2456 7.3999 35.1353 7.06396 34.7651 7.00781C34.3633 6.94385 34.2056 7.2876 34.0479 7.57568C33.418 8.75195 33.1733 10.0479 33.1973 11.3599C33.2524 14.312 34.4736 16.6641 36.8999 18.3359C37.1758 18.5278 37.2466 18.7197 37.1597 19C36.9946 19.5757 36.7974 20.1357 36.624 20.7119C36.5137 21.0801 36.3486 21.1597 35.9624 21C34.6309 20.4321 33.481 19.5918 32.4644 18.5757C30.7393 16.8721 29.1792 14.9917 27.2334 13.52C26.7764 13.1758 26.3193 12.856 25.8467 12.5518C23.8618 10.584 26.1069 8.96777 26.627 8.77588C27.1704 8.57568 26.8159 7.8877 25.0591 7.896C23.3022 7.90381 21.6953 8.50391 19.647 9.30371C19.3477 9.42383 19.0322 9.51172 18.7095 9.58398C16.8501 9.22363 14.9199 9.14355 12.9033 9.37598C9.10596 9.80762 6.07275 11.6396 3.84326 14.7681C1.16455 18.5278 0.53418 22.7998 1.30664 27.2559C2.11768 31.9521 4.46582 35.8398 8.07373 38.8799C11.8159 42.0322 16.1255 43.5762 21.041 43.2803C24.0269 43.104 27.3516 42.6963 31.1016 39.4561C32.0469 39.936 33.0396 40.1279 34.686 40.272C35.9546 40.3921 37.1758 40.208 38.1211 40.0078C39.6021 39.688 39.4995 38.2881 38.9639 38.0322C34.623 35.9678 35.5762 36.8081 34.71 36.1279C36.9155 33.4639 40.2402 30.6958 41.54 21.728C41.6426 21.0161 41.5557 20.5679 41.54 19.9917C41.5322 19.6396 41.6108 19.5039 42.0049 19.4639C43.0923 19.3359 44.1479 19.0317 45.1167 18.4878C47.9292 16.9199 49.064 14.3438 49.3315 11.2559C49.3711 10.7837 49.3237 10.2959 48.8354 10.0479ZM24.3262 37.8398C20.1196 34.4639 18.0791 33.3521 17.2358 33.3999C16.4482 33.4482 16.5898 34.3682 16.7632 34.9678C16.9443 35.5601 17.1812 35.9683 17.5117 36.4878C17.7402 36.832 17.8979 37.3442 17.2832 37.728C15.9282 38.584 13.5728 37.4399 13.4624 37.3838C10.7207 35.7358 8.42822 33.5601 6.81348 30.584C5.25342 27.7197 4.34766 24.6479 4.19775 21.3677C4.1582 20.5757 4.38672 20.2959 5.15869 20.1519C6.17529 19.96 7.22314 19.9199 8.23926 20.0718C12.5327 20.7119 16.1885 22.6719 19.2529 25.7759C21.002 27.5439 22.3252 29.6558 23.6885 31.7202C25.1377 33.9121 26.6978 36 28.6831 37.7119C29.3843 38.312 29.9434 38.7681 30.479 39.104C28.8643 39.2881 26.1699 39.3281 24.3262 37.8398ZM26.3433 24.6001C26.3433 24.248 26.6191 23.9678 26.9658 23.9678C27.0444 23.9678 27.1152 23.9839 27.1782 24.0078C27.2651 24.04 27.3438 24.0879 27.4067 24.1602C27.5171 24.272 27.5801 24.4321 27.5801 24.6001C27.5801 24.9521 27.3042 25.2319 26.9575 25.2319C26.6108 25.2319 26.3433 24.9521 26.3433 24.6001ZM32.6064 27.8799C32.2046 28.0479 31.8027 28.1919 31.4165 28.208C30.8179 28.2397 30.1641 27.9922 29.8096 27.688C29.2583 27.2158 28.8643 26.9521 28.6987 26.1279C28.6279 25.7759 28.6675 25.2319 28.7305 24.9199C28.8721 24.248 28.7144 23.8159 28.2495 23.4238C27.8716 23.104 27.3911 23.0161 26.8633 23.0161C26.666 23.0161 26.4849 22.9277 26.3511 22.856C26.1304 22.7441 25.9492 22.4639 26.1226 22.1201C26.1777 22.0078 26.4458 21.7358 26.5088 21.688C27.2256 21.272 28.0527 21.4077 28.8169 21.7197C29.5259 22.0161 30.0615 22.5601 30.834 23.3281C31.6216 24.2559 31.7632 24.5117 32.2124 25.208C32.5669 25.752 32.8901 26.312 33.1104 26.9521C33.2446 27.3521 33.0713 27.6802 32.6064 27.8799Z" fill="currentColor" fill-opacity="1.000000" fill-rule="nonzero"/></svg>
+      </button>
+      <button class="dsd-chip" id="chip" type="button" data-low="false" aria-label="打开 DeepSeek 状态">
+        <span id="chipmoney">¥124.80</span>
+        <span class="dsd-chip-sep" aria-hidden="true"></span>
+        <span class="dsd-chip-task" id="chiptask">2/6</span>
+      </button>
+    </div>
+  </div>
+
+<script>
+  const dock = document.getElementById('dock');
+  const card = document.getElementById('card');
+  const orb = document.getElementById('orb');
+  const chip = document.getElementById('chip');
+  const openCtl = document.getElementById('ctl-open');
+  const lowCtl = document.getElementById('ctl-low');
+  const peakCtl = document.getElementById('ctl-peak');
+  const tasksCtl = document.getElementById('ctl-tasks');
+
+  function setOpen(value) {
+    dock.dataset.open = value ? 'true' : 'false';
+    openCtl.checked = value;
+    orb.setAttribute('aria-expanded', String(value));
+  }
+
+  orb.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  chip.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  openCtl.addEventListener('change', () => setOpen(openCtl.checked));
+
+  lowCtl.addEventListener('change', () => {
+    const low = lowCtl.checked;
+    document.getElementById('balance').textContent = low ? '3.20' : '124.80';
+    document.getElementById('chipmoney').textContent = (low ? '¥3.20' : '¥124.80');
+    document.getElementById('amount').dataset.level = low ? 'warn' : 'ok';
+    chip.dataset.low = low ? 'true' : 'false';
+    dock.dataset.low = low ? 'true' : 'false';
+  });
+
+  peakCtl.addEventListener('change', () => {
+    const peak = peakCtl.checked;
+    document.getElementById('peaktag').dataset.peak = peak ? 'true' : 'false';
+    document.getElementById('peaklabel').textContent = peak ? '峰时' : '谷时';
+    document.getElementById('cost').textContent = peak ? '≈ ¥0.70' : '≈ ¥0.35';
+  });
+
+  tasksCtl.addEventListener('change', () => {
+    const on = tasksCtl.checked;
+    document.getElementById('todos').hidden = !on;
+    document.getElementById('empty').hidden = on;
+    document.getElementById('goal').hidden = !on;
+    document.getElementById('bar').style.width = on ? '33.3%' : '0%';
+    document.getElementById('taskcount').textContent = on ? '2/6' : '—';
+    document.getElementById('chiptask').textContent = on ? '2/6' : '0/0';
+    dock.dataset.progress = on ? 'pct' : 'none';
+    document.getElementById('ringfill').style.opacity = on ? '1' : '0';
+    if (on) {
+      document.getElementById('ringfill').setAttribute('stroke-dashoffset', '121.47');
+    }
+  });
+
+  document.getElementById('refresh').addEventListener('click', function () {
+    const button = this;
+    button.dataset.busy = 'true';
+    setTimeout(() => { button.dataset.busy = 'false'; }, 900);
+  });
+
+  card.addEventListener('pointermove', function (event) {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (event.clientX - rect.left) + 'px');
+    card.style.setProperty('--my', (event.clientY - rect.top) + 'px');
+  });
+
+  card.addEventListener('pointerleave', function () {
+    card.style.setProperty('--mx', '72%');
+    card.style.setProperty('--my', '0%');
+  });
+
+  const params = new URLSearchParams(location.search);
+  if (params.get('open') === '0') setOpen(false);
+  if (params.get('low') === '1') {
+    lowCtl.checked = true;
+    lowCtl.dispatchEvent(new Event('change'));
+  }
+  if (params.get('peak') === '1') {
+    peakCtl.checked = true;
+    peakCtl.dispatchEvent(new Event('change'));
+  }
+  if (params.get('tasks') === '0') {
+    tasksCtl.checked = false;
+    tasksCtl.dispatchEvent(new Event('change'));
+  }
+  if (params.get('clean') === '1') {
+    document.getElementById('bar').style.display = 'none';
+  }
+</script>
+</body>
+</html>
