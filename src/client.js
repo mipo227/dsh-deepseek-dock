@@ -13,8 +13,6 @@ window.__ModuleLoader__.load({
     var WHALE = __WHALE__;
     var STYLE_ID = 'dsh-deepseek-dock-style';
     var API = '/api/deepseek-dock/state';
-    var RING_R = 29;
-    var RING_C = 2 * Math.PI * RING_R;
 
     var FALLBACK_RATES = {
       peak: { inputMiss: 2.0, inputHit: 0.04, output: 8.0 },
@@ -255,13 +253,11 @@ window.__ModuleLoader__.load({
       var todos = useProjection('todos');
       var usage = useProjection('tokenUsage');
       var goalProjection = useProjection('goal');
-      var stats = useProjection('sessionStats');
 
       var openState = React.useState(false);
       var open = openState[0];
       var setOpen = openState[1];
       var rootRef = React.useRef(null);
-      var cardRef = React.useRef(null);
       var remote = useHostState(sessionId, open);
       var host = remote.host;
       var now = useTicker(15000);
@@ -282,31 +278,13 @@ window.__ModuleLoader__.load({
         };
       }, [open]);
 
-      function onCardMove(event) {
-        var card = cardRef.current;
-        if (card === null) return;
-        var rect = card.getBoundingClientRect();
-        card.style.setProperty('--mx', (event.clientX - rect.left) + 'px');
-        card.style.setProperty('--my', (event.clientY - rect.top) + 'px');
-      }
-
-      function onCardLeave() {
-        var card = cardRef.current;
-        if (card === null) return;
-        card.style.setProperty('--mx', '72%');
-        card.style.setProperty('--my', '0%');
-      }
-
       var items = Array.isArray(todos) ? todos : [];
       var total = items.length;
       var done = 0;
-      var inProgress = 0;
       for (var i = 0; i < items.length; i += 1) {
         if (items[i].status === 'completed') done += 1;
-        else if (items[i].status === 'in_progress') inProgress += 1;
       }
       var ratio = total > 0 ? done / total : 0;
-      var ringOffset = RING_C * (1 - ratio);
 
       var usageReady = usage != null;
       var totals = usage && usage.totals ? usage.totals : (usage || {});
@@ -342,8 +320,6 @@ window.__ModuleLoader__.load({
       var goalRounds = goalView ? Number(goalView.roundsStarted) || 0 : 0;
       var goalMax = goalView ? Number(goalView.goal.maxGoalRounds) || 0 : 0;
 
-      var cardClassName = 'dsd-card';
-      var rootClassName = 'dsd-root';
       var progressState = total > 0 ? 'pct' : 'none';
 
       var refreshLabel = remote.loading ? text('loading') : text('refresh');
@@ -352,27 +328,22 @@ window.__ModuleLoader__.load({
 
       return ReactDOM.createPortal(
         h('div', {
-          className: rootClassName,
+          className: 'dsd-root',
           ref: rootRef,
           'data-open': open ? 'true' : 'false',
           'data-progress': progressState,
           'data-low': level === 'warn' || level === 'bad' ? 'true' : 'false'
         },
           h('div', {
-            className: cardClassName,
-            ref: cardRef,
+            className: 'dsd-card',
             role: 'dialog',
             'aria-label': 'DeepSeek status',
-            'aria-hidden': open ? 'false' : 'true',
-            onPointerMove: onCardMove,
-            onPointerLeave: onCardLeave
+            'aria-hidden': open ? 'false' : 'true'
           },
-            h('div', { className: 'dsd-aurora', 'aria-hidden': true }),
             h('div', { className: 'dsd-head' },
               h('div', { className: 'dsd-brand' },
                 h('svg', { viewBox: '0 0 50 50', 'aria-hidden': true, dangerouslySetInnerHTML: { __html: WHALE } }),
-                h('span', null, 'DEEPSEEK'),
-                h('span', { className: 'dsd-sub' }, 'DOCK')
+                h('span', null, 'DeepSeek')
               ),
               h('button', {
                 type: 'button',
@@ -425,9 +396,11 @@ window.__ModuleLoader__.load({
               h('span', null, text('task')),
               h('b', null, total > 0 ? done + '/' + total : '—')
             ),
-            h('div', { className: 'dsd-progress' },
-              h('i', { style: { width: (ratio * 100).toFixed(1) + '%' } })
-            ),
+            total > 0
+              ? h('div', { className: 'dsd-progress' },
+                  h('i', { style: { width: (ratio * 100).toFixed(1) + '%' } })
+                )
+              : null,
             total > 0
               ? h('ul', { className: 'dsd-todos' }, items.map(function (item, index) {
                   return h(TodoRow, { key: index, item: item });
@@ -447,43 +420,29 @@ window.__ModuleLoader__.load({
               h('span', null, updatedText)
             )
           ),
-          h('div', { className: 'dsd-orb-wrap' },
+          h('div', { className: 'dsd-tile-wrap' },
             h('button', {
               type: 'button',
-              className: 'dsd-orb',
+              className: 'dsd-tile',
               onClick: function () { setOpen(function (value) { return !value; }); },
               'aria-expanded': open,
               'aria-label': open ? text('close') : text('open')
             },
-              h('svg', { className: 'dsd-ring', viewBox: '0 0 64 64', 'aria-hidden': true },
-                h('defs', null,
-                  h('linearGradient', { id: 'dsd-ring-gradient', x1: '0', y1: '0', x2: '1', y2: '1' },
-                    h('stop', { offset: '0%', stopColor: '#ffffff' }),
-                    h('stop', { offset: '100%', stopColor: '#8f949c' })
-                  )
-                ),
-                h('circle', { className: 'track', cx: 32, cy: 32, r: RING_R }),
-                h('circle', {
-                  className: 'fill',
-                  cx: 32,
-                  cy: 32,
-                  r: RING_R,
-                  strokeDasharray: RING_C.toFixed(2),
-                  strokeDashoffset: ringOffset.toFixed(2)
-                })
-              ),
-              h('svg', { className: 'dsd-logo', viewBox: '0 0 50 50', 'aria-hidden': true, dangerouslySetInnerHTML: { __html: WHALE } })
+              h('svg', { className: 'dsd-logo', viewBox: '0 0 50 50', 'aria-hidden': true, dangerouslySetInnerHTML: { __html: WHALE } }),
+              h('span', { className: 'dsd-tile-bar', 'aria-hidden': true },
+                h('i', { style: { width: (ratio * 100).toFixed(1) + '%' } })
+              )
             ),
             h('button', {
               type: 'button',
-              className: 'dsd-chip',
+              className: 'dsd-caption',
               onClick: function () { setOpen(function (value) { return !value; }); },
               'data-low': level === 'warn' || level === 'bad' ? 'true' : 'false',
               'aria-label': open ? text('close') : text('open')
             },
-              h('span', null, balance ? currency + balanceText : currency + '—'),
-              h('span', { className: 'dsd-chip-sep', 'aria-hidden': true }),
-              h('span', { className: 'dsd-chip-task' }, total > 0 ? done + '/' + total : (inProgress > 0 ? '…' : '0/0'))
+              h('span', { className: 'dsd-caption-money' }, balance ? currency + balanceText : currency + '—'),
+              h('span', { className: 'dsd-caption-sep', 'aria-hidden': true }, '·'),
+              h('span', { className: 'dsd-caption-task' }, total > 0 ? done + '/' + total : '')
             )
           )
         ),

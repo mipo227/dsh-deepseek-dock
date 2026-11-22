@@ -280,10 +280,10 @@ __CSS__
         <span class="fh-tag">deepseek-flash</span>
       </header>
       <div class="fake-chat">
-        <div class="msg user">用上液态玻璃效果，背景尽量黑色、简约。</div>
+        <div class="msg user">尽量简洁；圆角方形像 iPhone；背景透明，只留高斯模糊。</div>
         <div class="msg bot">
           <p>收到。挂件放在窗口右下角，余额、token 和任务进度都收在一颗小鲸鱼里。</p>
-          <p>面板用黑色半透明玻璃，边缘留一道高光；任务完成度做成环形进度。</p>
+          <p>面板改成透明高斯模糊，图标是 Apple 式圆角方形，任务进度做成底部一条细线。</p>
           <div class="code">GET /api/deepseek-dock/state</div>
         </div>
       </div>
@@ -301,11 +301,10 @@ __CSS__
 
   <div class="dsd-root" id="dock" data-open="true" data-progress="pct" data-low="false">
     <div class="dsd-card" id="card" role="dialog" aria-label="DeepSeek status">
-      <div class="dsd-aurora" aria-hidden="true"></div>
       <div class="dsd-head">
         <div class="dsd-brand">
           <svg viewBox="0 0 50 50" aria-hidden="true">__WHALE__</svg>
-          <span>DEEPSEEK</span><span class="dsd-sub">DOCK</span>
+          <span>DeepSeek</span>
         </div>
         <button class="dsd-refresh" id="refresh" type="button" title="刷新余额" aria-label="刷新余额">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -327,47 +326,35 @@ __CSS__
       </div>
       <div class="dsd-costline"><span id="sessionline">本会话 · 1.9M tokens</span><b id="cost">≈ ¥0.35</b></div>
       <div class="dsd-rule"></div>
-      <div class="dsd-section-head"><span>任务</span><b id="taskcount">2/6</b></div>
-      <div class="dsd-progress"><i id="bar" style="width:33.3%"></i></div>
+      <div class="dsd-section-head"><span>任务</span><b id="taskcount">2/5</b></div>
+      <div class="dsd-progress"><i id="bar" style="width:40%"></i></div>
       <ul class="dsd-todos" id="todos">
-        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">调研 GitHub 上的成熟参考项目</span></li>
-        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">确定余额与 token 数据来源</span></li>
-        <li data-status="in_progress"><span class="dsd-check"></span><span class="dsd-todo-text">实现液态玻璃挂件 UI</span></li>
-        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">接入 todo 任务进度投影</span></li>
-        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">安装到 DSH 桌面端并验证</span></li>
-        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">补充余额预警与刷新策略</span></li>
+        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">调研 GitHub 参考项目</span></li>
+        <li data-status="completed"><span class="dsd-check"><svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 5.2 4 7.7 8.7 2.2"></path></svg></span><span class="dsd-todo-text">插件骨架与余额接口</span></li>
+        <li data-status="in_progress"><span class="dsd-check"></span><span class="dsd-todo-text">简化挂件视觉</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">接入 todo 任务进度</span></li>
+        <li data-status="pending"><span class="dsd-check"></span><span class="dsd-todo-text">安装与验证</span></li>
       </ul>
       <div class="dsd-empty" id="empty" hidden><b>暂无任务清单</b><span>智能体开始多步任务时，会在这里显示完成进度</span></div>
-      <div class="dsd-goal" id="goal"><span>目标 · 完成液态玻璃挂件并接入真实数据</span><b>轮次 2/5</b></div>
       <div class="dsd-foot"><span id="footnote">估算值，以官方账单为准</span><span>刚刚更新</span></div>
     </div>
-    <div class="dsd-orb-wrap">
-      <button class="dsd-orb" id="orb" type="button" aria-expanded="true" aria-label="收起 DeepSeek 状态">
-        <svg class="dsd-ring" viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="dsd-ring-gradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#ffffff"></stop>
-              <stop offset="100%" stop-color="#8f949c"></stop>
-            </linearGradient>
-          </defs>
-          <circle class="track" cx="32" cy="32" r="29"></circle>
-          <circle class="fill" id="ringfill" cx="32" cy="32" r="29" stroke-dasharray="182.21" stroke-dashoffset="121.47"></circle>
-        </svg>
+    <div class="dsd-tile-wrap">
+      <button class="dsd-tile" id="tile" type="button" aria-expanded="true" aria-label="收起 DeepSeek 状态">
         <svg class="dsd-logo" viewBox="0 0 50 50" aria-hidden="true">__WHALE__</svg>
+        <span class="dsd-tile-bar" aria-hidden="true"><i id="tile-bar-fill" style="width:40%"></i></span>
       </button>
-      <button class="dsd-chip" id="chip" type="button" data-low="false" aria-label="打开 DeepSeek 状态">
-        <span id="chipmoney">¥124.80</span>
-        <span class="dsd-chip-sep" aria-hidden="true"></span>
-        <span class="dsd-chip-task" id="chiptask">2/6</span>
+      <button class="dsd-caption" id="caption" type="button" data-low="false" aria-label="打开 DeepSeek 状态">
+        <span class="dsd-caption-money" id="caption-money">¥124.80</span>
+        <span class="dsd-caption-sep" aria-hidden="true">·</span>
+        <span class="dsd-caption-task" id="caption-task">2/5</span>
       </button>
     </div>
   </div>
 
 <script>
   const dock = document.getElementById('dock');
-  const card = document.getElementById('card');
-  const orb = document.getElementById('orb');
-  const chip = document.getElementById('chip');
+  const tile = document.getElementById('tile');
+  const caption = document.getElementById('caption');
   const openCtl = document.getElementById('ctl-open');
   const lowCtl = document.getElementById('ctl-low');
   const peakCtl = document.getElementById('ctl-peak');
@@ -376,19 +363,20 @@ __CSS__
   function setOpen(value) {
     dock.dataset.open = value ? 'true' : 'false';
     openCtl.checked = value;
-    orb.setAttribute('aria-expanded', String(value));
+    tile.setAttribute('aria-expanded', String(value));
+    caption.setAttribute('aria-expanded', String(value));
   }
 
-  orb.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
-  chip.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  tile.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
+  caption.addEventListener('click', () => setOpen(dock.dataset.open !== 'true'));
   openCtl.addEventListener('change', () => setOpen(openCtl.checked));
 
   lowCtl.addEventListener('change', () => {
     const low = lowCtl.checked;
     document.getElementById('balance').textContent = low ? '3.20' : '124.80';
-    document.getElementById('chipmoney').textContent = (low ? '¥3.20' : '¥124.80');
+    document.getElementById('caption-money').textContent = low ? '¥3.20' : '¥124.80';
     document.getElementById('amount').dataset.level = low ? 'warn' : 'ok';
-    chip.dataset.low = low ? 'true' : 'false';
+    caption.dataset.low = low ? 'true' : 'false';
     dock.dataset.low = low ? 'true' : 'false';
   });
 
@@ -403,32 +391,17 @@ __CSS__
     const on = tasksCtl.checked;
     document.getElementById('todos').hidden = !on;
     document.getElementById('empty').hidden = on;
-    document.getElementById('goal').hidden = !on;
-    document.getElementById('bar').style.width = on ? '33.3%' : '0%';
-    document.getElementById('taskcount').textContent = on ? '2/6' : '—';
-    document.getElementById('chiptask').textContent = on ? '2/6' : '0/0';
+    document.getElementById('bar').style.width = on ? '40%' : '0%';
+    document.getElementById('taskcount').textContent = on ? '2/5' : '—';
+    document.getElementById('caption-task').textContent = on ? '2/5' : '';
+    document.getElementById('tile-bar-fill').style.width = on ? '40%' : '0%';
     dock.dataset.progress = on ? 'pct' : 'none';
-    document.getElementById('ringfill').style.opacity = on ? '1' : '0';
-    if (on) {
-      document.getElementById('ringfill').setAttribute('stroke-dashoffset', '121.47');
-    }
   });
 
   document.getElementById('refresh').addEventListener('click', function () {
     const button = this;
     button.dataset.busy = 'true';
     setTimeout(() => { button.dataset.busy = 'false'; }, 900);
-  });
-
-  card.addEventListener('pointermove', function (event) {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mx', (event.clientX - rect.left) + 'px');
-    card.style.setProperty('--my', (event.clientY - rect.top) + 'px');
-  });
-
-  card.addEventListener('pointerleave', function () {
-    card.style.setProperty('--mx', '72%');
-    card.style.setProperty('--my', '0%');
   });
 
   const params = new URLSearchParams(location.search);
